@@ -62,10 +62,13 @@ CRITICAL INSTRUCTIONS:
 2. Interpret the deterministic results and explain the business rationale, trade-offs, and risk factors.
 3. Deliver professional B2B executive advice suitable for manufacturing procurement directors.
 4. Return ONLY valid JSON conforming to the requested schema.
+5. The buying company is "${payload.companyContext || 'Nova Manufacturing Ltd.'}". Always refer to it by that name (or "we"/"our"), never by an identifier.
+6. The RFQ ID below is only a reference number for this sourcing request. It is NOT a company or vendor name. Never use it as the subject or owner of anything (do not write "partner for RFQ-..."). Mention it at most once, as a reference, e.g. "under RFQ-...".
+7. The only vendor names that exist are those listed in the rankings below.
 
 STRUCTURED EVALUATION INPUTS:
-- Company Context: ${payload.companyContext || 'Nova Manufacturing Ltd.'}
-- RFQ ID: ${payload.rfqId || 'RFQ-2026-MFG-048'}
+- Buying company (the organisation making this decision): ${payload.companyContext || 'Nova Manufacturing Ltd.'}
+- RFQ reference number (an identifier only, not a company name): ${payload.rfqId || 'RFQ-2026-MFG-048'}
 - Category: Precision Machined Components & Assemblies
 
 ACTIVE CRITERION WEIGHTS:
@@ -100,7 +103,7 @@ ${
 
 Please respond with a JSON object with EXACTLY this structure:
 {
-  "executiveSummary": "2-3 concise sentences summarizing the decision for the procurement committee.",
+  "executiveSummary": "2-3 concise sentences summarizing the decision for the procurement committee at ${payload.companyContext || 'Nova Manufacturing Ltd.'}. Name the recommended vendor and the buying company; do not use the RFQ number as a name.",
   "recommendedVendor": "${winner?.name || ''}",
   "whyRankedHighest": "Detailed breakdown explaining why this vendor achieved rank #1 given the current weighting profile and scores.",
   "majorStrengths": [

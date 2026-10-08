@@ -85,6 +85,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     try {
       localStorage.removeItem('vendorwise_gemini_key');
+      localStorage.removeItem('vendorwise_ai_cache'); // superseded by vendorwise_ai_cache_v2
     } catch {
       // storage unavailable; nothing to clear
     }
@@ -209,7 +210,8 @@ export const App: React.FC = () => {
 
       // Reuse a previous AI result for identical inputs (survives page reloads)
       // so a refresh doesn't spend Gemini quota. Re-analyze passes force=true.
-      const cacheKey = 'vendorwise_ai_cache';
+      // Bump the suffix whenever the prompt changes, so briefings written by an older prompt are not reused.
+      const cacheKey = 'vendorwise_ai_cache_v2';
       const inputsKey = currentInputsKey;
       if (!force) {
         const cached = loadJson<{ inputsKey?: string; response?: AiRecommendationResponse } | null>(

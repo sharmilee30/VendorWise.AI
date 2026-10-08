@@ -123,6 +123,13 @@ npm start
 
 ---
 
+## 🔒 Privacy & Data Sharing
+
+- To write the AI briefing, the **vendor names, their scores and the criteria weights** shown in the app are sent to **Google's Gemini API**. Supplier notes, scenario titles and your API key are not sent, and the app collects no personal data.
+- Saved suppliers, weights, scenarios and the last AI result are stored only in **your own browser** (`localStorage`). The server has no database; its logs contain request IDs, timings and the winning supplier's name, not scores or weights.
+- Do not enter confidential or personal information. On Google's free Gemini tier, submitted content may be used to improve Google's products (check Google's current terms). The sample suppliers in this project are fictional.
+- If no API key is configured, nothing is sent anywhere and the built-in rule-based explanation is used.
+
 ## ☁️ Deployment (Render, free tier)
 
 The app is a single Node service: Express serves the built React app *and* the API, so only one
