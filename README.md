@@ -130,6 +130,18 @@ npm start
 - Do not enter confidential or personal information. On Google's free Gemini tier, submitted content may be used to improve Google's products (check Google's current terms). The sample suppliers in this project are fictional.
 - If no API key is configured, nothing is sent anywhere and the built-in rule-based explanation is used.
 
+## 🔒 Data & Privacy
+
+- To write the AI briefing, **vendor names, scores and weights are sent to Google's Gemini API**
+  (plus the fixed company name and RFQ number). Supplier notes and scenario titles are never sent.
+  Do not enter confidential or personal information. Under Google's free-tier terms, content may be
+  used to improve Google's products; check the current terms.
+- The app has no database or user accounts. Suppliers, weights, scenarios and the last AI briefing
+  are stored only in your own browser.
+- The AI only **explains** the ranking. The recommended and backup vendors shown always come from
+  the app's own deterministic ranking, never from the AI's text, and the AI's reply is type-checked
+  and length-limited before it is shown.
+
 ## ☁️ Deployment (Render, free tier)
 
 The app is a single Node service: Express serves the built React app *and* the API, so only one

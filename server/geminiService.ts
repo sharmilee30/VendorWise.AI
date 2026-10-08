@@ -5,6 +5,7 @@ import {
 } from '../src/types';
 import { generateDeterministicRecommendation } from '../src/services/scoringEngine';
 import { createLogger, describeError, Logger } from './logger';
+import { normalizeAiReply } from './aiReply';
 
 // Per attempt. Worst case (timeout, retry, timeout) is about 2 x this, then the rule-based fallback.
 const REQUEST_TIMEOUT_MS = 25_000;
@@ -61,10 +62,14 @@ CRITICAL INSTRUCTIONS:
 1. Do NOT recalculate or alter the calculated scores or vendor rankings. The rankings are mathematically locked.
 2. Interpret the deterministic results and explain the business rationale, trade-offs, and risk factors.
 3. Deliver professional B2B executive advice suitable for manufacturing procurement directors.
-4. Return ONLY valid JSON conforming to the requested schema.
-5. The buying company is "${payload.companyContext || 'Nova Manufacturing Ltd.'}". Always refer to it by that name (or "we"/"our"), never by an identifier.
-6. The RFQ ID below is only a reference number for this sourcing request. It is NOT a company or vendor name. Never use it as the subject or owner of anything (do not write "partner for RFQ-..."). Mention it at most once, as a reference, e.g. "under RFQ-...".
-7. The only vendor names that exist are those listed in the rankings below.
+4. Use ONLY the data provided below. Do not invent policies, commitments, certifications, strategies or any other facts that are not in the data.
+5. Call a vendor "best", "cheapest" or "strongest" on a criterion ONLY if its score on that criterion is the highest in the table. Otherwise describe it accurately (for example "third of five on cost").
+6. Return ONLY valid JSON conforming to the requested schema.
+
+NAMING RULES:
+- The buying company is "${payload.companyContext || 'Nova Manufacturing Ltd.'}". Refer to it by that name (or "we"/"our"), never by an identifier.
+- The RFQ ID below is only a reference number for this sourcing request. It is NOT a company or vendor name. Never use it as the subject or owner of anything (do not write "partner for RFQ-..."). Mention it at most once, as a reference, e.g. "under RFQ-...".
+- The only vendor names that exist are those listed in the rankings below.
 
 STRUCTURED EVALUATION INPUTS:
 - Buying company (the organisation making this decision): ${payload.companyContext || 'Nova Manufacturing Ltd.'}
@@ -184,32 +189,27 @@ Please respond with a JSON object with EXACTLY this structure:
 
     const parsed = JSON.parse(cleanedText);
 
+    // The winner and backup shown to the user come from the app's own ranking, never from the
+    // model's text, and every field is type-checked and length-capped (see aiReply.ts).
+    const reply = normalizeAiReply(parsed, winner?.name || '', runnerUp?.name || '');
+    if (parsed?.recommendedVendor && parsed.recommendedVendor !== reply.recommendedVendor) {
+      log.warn('Model named a different vendor than the computed ranking; using the ranking', {
+        modelSaid: String(parsed.recommendedVendor).slice(0, 60),
+        ranking: reply.recommendedVendor,
+      });
+    }
+
     log.info('Gemini request succeeded', {
       ms: Date.now() - startTime,
       model: modelName,
-      recommended: parsed.recommendedVendor || winner?.name,
+      recommended: reply.recommendedVendor,
     });
 
     return {
       success: true,
       isAiGenerated: true,
       modelName,
-      recommendedVendor:
-        parsed.recommendedVendor || winner?.name || '',
-      whyRankedHighest: parsed.whyRankedHighest || '',
-      majorStrengths: Array.isArray(parsed.majorStrengths)
-        ? parsed.majorStrengths
-        : [],
-      majorWeaknesses: Array.isArray(parsed.majorWeaknesses)
-        ? parsed.majorWeaknesses
-        : [],
-      bestAlternative: parsed.bestAlternative || {
-        name: runnerUp?.name || 'N/A',
-        justification: '',
-      },
-      weightSensitivity: parsed.weightSensitivity || '',
-      executiveSummary: parsed.executiveSummary || '',
-      rawText: candidateText,
+      ...reply,
     };
   } catch (error) {
     // Log a compact, key-redacted summary (status + message), never the raw SDK error object.

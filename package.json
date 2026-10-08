@@ -11,7 +11,7 @@
     "start": "tsx server/index.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "tsx tests/scoringEngine.test.ts && tsx tests/validation.test.ts && tsx tests/storage.test.ts && tsx tests/geminiService.test.ts"
+    "test": "tsx tests/scoringEngine.test.ts && tsx tests/validation.test.ts && tsx tests/storage.test.ts && tsx tests/aiReply.test.ts && tsx tests/geminiService.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.27.0",

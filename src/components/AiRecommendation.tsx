@@ -224,6 +224,20 @@ export const AiRecommendation: React.FC<AiRecommendationProps> = ({
           Click "Re-analyze Decision" to generate structured procurement guidance.
         </div>
       )}
+
+      {/* Responsible-use notes: advisory status and what leaves the browser */}
+      <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/70 space-y-1.5 text-[11px] leading-relaxed text-slate-500">
+        <p>
+          <strong className="text-slate-700">Advisory only.</strong> This briefing explains the
+          ranking above; it does not change it. Check the text against the numbers shown on this
+          page. The final decision is yours.
+        </p>
+        <p>
+          <strong className="text-slate-700">Data notice.</strong> To write the AI briefing,
+          vendor names, scores and weights are sent to Google's Gemini API. Do not enter
+          confidential or personal information.
+        </p>
+      </div>
     </div>
   );
 };
